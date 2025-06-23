@@ -92,7 +92,7 @@ print(" Building global neighbours graph")
 k_full = max(100, round(ARGS.kperc * adata.n_obs / 100))
 sc.pp.neighbors(adata, n_neighbors=k_full)
 
-print(" Leiden → megaclusters")
+
 sc.tl.leiden(adata, resolution=ARGS.res_mega, key_added="megacluster")
 mega_codes = adata.obs["megacluster"].astype("category").cat.codes.values
 mega_names = adata.obs["megacluster"].cat.categories.tolist()
