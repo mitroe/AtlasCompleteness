@@ -1,12 +1,11 @@
 # AtlasCompleteness
-This project integrates single-cell RNA sequencing (scRNA-seq) data with statistical biodiversity estimation methods to quantify cellular diversity within organs and assess the completeness of large-scale sequencing efforts.
+This project integrates single-cell RNA sequencing (scRNA-seq) data with statistical biodiversity estimation methods to quantify cellular diversity within organs and assess the completeness of large-scale sequencing efforts. In Miihkinen et al. (under review Nat comms, bioRxiv: https://doi.org/10.1101/2025.01.08.631769), we show that the Chao2 statistical estimator can be used to quantify the completeness of large-scale single-cell sequencing projects.
 ## Chao2 Saturation Wrapper
-
-In Miihkinen et al. (under review Nat comms, bioRxiv: https://doi.org/10.1101/2025.01.08.631769), we show that the Chao2 statistical estimator can be used to quantify the completeness of large-scale single-cell sequencing projects. In this repository, we provide a wrapper function for estimating atlas completeness using Chao2 statistics. The function generates richness saturation curves that illustrate how increasing sampling depth contributes to the discovery of new cell populations and how observed richness relates to Chao2-based estimates of total diversity across sampling depths. This tutorial shows examples of the wrapper function using colon immune atlas from James et al., Immunity (2023) DOI: 10.1016/j.immuni.2023.01.002:
+In this repository, we provide a wrapper function for estimating atlas completeness using Chao2 statistics. The function generates richness saturation curves that illustrate how increasing sampling depth contributes to the discovery of new cell populations and how observed richness relates to Chao2-based estimates of total diversity across sampling depths. This tutorial shows examples of the wrapper function using colon immune atlas from James et al., Immunity (2023) DOI: 10.1016/j.immuni.2023.01.002.
 
 ![Chao2 saturation curve](chao2_saturation.svg)
 
-The richness saturation plot displays both observed richness and Chao2-based estimates of total richness across different sampling depths and also enables direct comparisons between groups. As an example, we show that, in the colon immune dataset of James et al. (2023), the female donor subset appears less saturated than the male donor subset, suggesting that additional female samples may reveal further cell populations:
+Separating the immune atlas into subsets based on donor sex alters the saturation dynamics. The female donor subset appears less saturated than the male donor subset, suggesting that additional female samples may uncover previously unobserved cell populations:
 
 ![Chao2 saturation curve_sex_comparison](chao2_sex_comparison.svg)
 
