@@ -1,7 +1,9 @@
 # AtlasCompleteness
 This project integrates single-cell RNA sequencing (scRNA-seq) data with statistical biodiversity estimation methods to quantify cellular diversity within organs and assess the completeness of large-scale sequencing efforts. In Miihkinen et al. (under review, bioRxiv: https://doi.org/10.1101/2025.01.08.631769), we show that the Chao2 statistical estimator can be used to quantify the completeness of large-scale single-cell sequencing projects.
 ## Chao2 Saturation Wrapper
-In this repository, we provide a wrapper function for estimating atlas completeness using Chao2 statistics. The function generates richness saturation curves that illustrate how increasing sampling depth contributes to the discovery of new cell populations and how observed richness relates to Chao2-based estimates of total diversity across sampling depths. This tutorial shows examples of the wrapper function using colon immune atlas from James et al., Immunity (2023) DOI: 10.1016/j.immuni.2023.01.002. The atlas appears complete according to Chao2 estimates.
+In this repository, we provide a wrapper function for estimating atlas completeness using Chao2 statistics. The function generates richness saturation curves that illustrate how increasing sampling depth contributes to the discovery of new cell populations and how observed richness relates to Chao2-based estimates of total diversity across sampling depths. 
+
+This tutorial shows examples of the wrapper function using colon immune atlas from James et al., Immunity (2023) DOI: 10.1016/j.immuni.2023.01.002. The atlas appears complete according to Chao2 estimates.
 
 ![Chao2 saturation curve](chao2_saturation.svg)
 
