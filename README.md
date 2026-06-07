@@ -6,7 +6,7 @@ In Miihkinen et al. (under review Nat comms, bioRxiv: https://doi.org/10.1101/20
 
 ![Chao2 saturation curve](chao2_saturation.svg)
 
-The richness saturation plot displays both observed richness and Chao2-based estimates of total richness across different sampling depths, and allows now also direct group comparisons. The the below example the dataset would benefit from profiling more samples from female donors:
+The richness saturation plot displays both observed richness and Chao2-based estimates of total richness across different sampling depths, and allows now also direct group comparisons. In the example below, the dataset would benefit from having more samples from female donors:
 
 ![Chao2 saturation curve_sex_comparison](chao2_sex_comparison.svg)
 
