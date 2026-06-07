@@ -7,7 +7,7 @@ This tutorial shows examples of the wrapper function using colon immune atlas fr
 
 ![Chao2 saturation curve](chao2_saturation.svg)
 
-However, males and females are known to exhibit differences in immune system composition and function. Separating the immune atlas into subsets based on donor sex alters the saturation dynamics. The female donor subset appears less saturated than the male donor subset, suggesting that additional female samples may uncover previously unobserved cell populations:
+However, males and females are known to exhibit differences in immune system composition and function. Separating the immune atlas into subsets based on donor sex alters the saturation dynamics. The female donor subset appears less saturated than the male donor subset, and Chao2-based estimate is higher than observed species richness. This Suggests that additional female samples may uncover previously unobserved cell populations:
 
 ![Chao2 saturation curve_sex_comparison](chao2_sex_comparison.svg)
 
