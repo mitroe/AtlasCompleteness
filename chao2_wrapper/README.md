@@ -32,7 +32,7 @@ result = Chao2_saturation(
     min_samples=3,
     n_permutations=200,
     random_state=0,
-    title="Comparison of assays"
+    title="My first species richness saturation curve"
 )
 
 result.summary
