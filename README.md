@@ -6,6 +6,8 @@ In Miihkinen et al. (under review Nat comms, bioRxiv: https://doi.org/10.1101/20
 
 ![Chao2 saturation curve](chao2_saturation.svg)
 
+The richness saturation plot displays both observed richness and Chao2-based estimates of total richness across different sampling depths.
+
 Location:
 
 ```text
