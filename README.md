@@ -16,7 +16,7 @@ Main script:
 chao2_wrapper/chao2_saturation.py
 ```
 
-Documentation:
+Documentation gives instructions how to run the chao2 saturation scripts:
 
 ```text
 chao2_wrapper/README.md
