@@ -18,9 +18,11 @@ pip install numpy pandas matplotlib anndata
 
 `anndata` is only needed if you want to pass an `AnnData` object directly.
 
-## Basic use with AnnData. We suggest users to select either classic (S_Chao2) or bias-corrected Chao2 (S_Chao2_bc).
+## Basic use with AnnData.
 
 ```python
+#We suggest users to select either classic (S_Chao2) or bias-corrected Chao2 (S_Chao2_bc).
+#adata is an AnnData object obtainable through any Scanpy workflow (https://scanpy.scverse.org/en/stable/)
 result = Chao2_saturation(
     adata,
     cluster_col="leiden",
