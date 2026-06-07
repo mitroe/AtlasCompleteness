@@ -1,5 +1,4 @@
-"""Chao2 saturation curves for clustered single-cell or other incidence datasets."""
-
+##Run Chao2 saturation plot for single-cell data in python. The code performs bootstrapped Chao2 estimations to show richness saturation towards the full dataset size
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -114,6 +113,7 @@ def Chao2_saturation(
     group_col: Optional[str] = None,
     groups: Optional[Sequence[str]] = None,
     n_permutations: int = 200,
+    min_samples: int = 3,
     random_state: Optional[int] = 0,
     estimator: str = "S_Chao2_bc",
     plot: bool = True,
@@ -127,21 +127,19 @@ def Chao2_saturation(
     ----------
     data
         pandas DataFrame, AnnData object, or precomputed incidence table.
-        For raw metadata, rows are cells/observations. For incidence tables,
-        rows are clusters/species and columns are samples/donors.
     cluster_col
         Column containing cluster/species labels, e.g. "leiden" or "cell_type".
-        Required unless `data` is already an incidence table.
     sample_col
         Column containing sample/donor labels, e.g. "donor_id".
-        Required unless `data` is already an incidence table.
     group_col
         Optional column used to stratify the analysis, e.g. "donor_group".
-        Only supported for raw DataFrame or AnnData input.
     groups
         Optional subset/order of groups to include.
     n_permutations
         Number of random sample-order permutations used for the curve.
+    min_samples
+        Minimum number of samples used for the first subsampling point.
+        Default is 3.
     random_state
         Seed for reproducible curves.
     estimator
@@ -152,24 +150,17 @@ def Chao2_saturation(
         Optional matplotlib axes.
     title
         Optional plot title.
-
-    Returns
-    -------
-    Chao2SaturationResult with:
-        curve: long DataFrame of saturation values
-        incidence: binary cluster x sample table for all included data
-        summary: final estimate per group
-        fig, ax: matplotlib objects, or None if plot=False
     """
     valid_estimators = {"S_obs", "S_Chao2", "S_Chao2_bc", "S_iChao2"}
     if estimator not in valid_estimators:
         raise ValueError(f"estimator must be one of {sorted(valid_estimators)}")
     if n_permutations < 1:
         raise ValueError("n_permutations must be >= 1")
+    if min_samples < 1:
+        raise ValueError("min_samples must be >= 1")
 
     rng = np.random.default_rng(random_state)
 
-    # Convert AnnData to obs DataFrame for grouped runs.
     if ad is not None and isinstance(data, ad.AnnData):
         obs_data = data.obs.copy()
     elif isinstance(data, pd.DataFrame):
@@ -182,10 +173,21 @@ def Chao2_saturation(
             raise ValueError("group_col requires raw DataFrame or AnnData input, not a precomputed incidence table.")
         if group_col not in obs_data.columns:
             raise KeyError(f"Missing group_col in data: {group_col}")
-        group_values = list(groups) if groups is not None else list(pd.Series(obs_data[group_col]).dropna().astype(str).unique())
+
+        group_values = (
+            list(groups)
+            if groups is not None
+            else list(pd.Series(obs_data[group_col]).dropna().astype(str).unique())
+        )
+
         incidence_all = _make_incidence_table(obs_data, cluster_col, sample_col)
+
         incidence_by_group = {
-            str(g): _make_incidence_table(obs_data[obs_data[group_col].astype(str) == str(g)], cluster_col, sample_col)
+            str(g): _make_incidence_table(
+                obs_data[obs_data[group_col].astype(str) == str(g)],
+                cluster_col,
+                sample_col,
+            )
             for g in group_values
         }
     else:
@@ -194,16 +196,27 @@ def Chao2_saturation(
 
     curve_rows = []
     summary_rows = []
+
     for group_name, incidence in incidence_by_group.items():
         samples = np.array(incidence.columns)
-        if len(samples) == 0:
+        n_samples_total = len(samples)
+
+        if n_samples_total == 0:
             continue
+
+        if n_samples_total < min_samples:
+            raise ValueError(
+                f"Group '{group_name}' has only {n_samples_total} samples, "
+                f"which is fewer than min_samples={min_samples}."
+            )
 
         for rep in range(n_permutations):
             ordered = rng.permutation(samples)
-            for k in range(1, len(ordered) + 1):
+
+            for k in range(min_samples, n_samples_total + 1):
                 Xk = incidence.loc[:, ordered[:k]].to_numpy()
                 stats = _chao2_stats(Xk)
+
                 curve_rows.append({
                     "group": group_name,
                     "permutation": rep,
@@ -218,6 +231,7 @@ def Chao2_saturation(
     summary = pd.DataFrame(summary_rows)
 
     fig = None
+
     if plot:
         if ax is None:
             fig, ax = plt.subplots(figsize=(6, 4))
@@ -225,22 +239,63 @@ def Chao2_saturation(
             fig = ax.figure
 
         mean_curve = (
-            curve.groupby(["group", "n_samples"], as_index=False)[estimator]
-            .agg(["mean", "std"])
-            .reset_index()
+            curve.groupby(["group", "n_samples"], as_index=False)
+            .agg(
+                estimator_mean=(estimator, "mean"),
+                estimator_std=(estimator, "std"),
+                observed_mean=("S_obs", "mean"),
+                observed_std=("S_obs", "std"),
+            )
         )
 
         for group_name, sub in mean_curve.groupby("group"):
             x = sub["n_samples"].to_numpy(dtype=float)
-            y = sub["mean"].to_numpy(dtype=float)
-            sd = sub["std"].fillna(0).to_numpy(dtype=float)
-            ax.plot(x, y, marker="o", label=str(group_name))
-            ax.fill_between(x, y - sd, y + sd, alpha=0.2)
+
+            y_est = sub["estimator_mean"].to_numpy(dtype=float)
+            sd_est = sub["estimator_std"].fillna(0).to_numpy(dtype=float)
+
+            y_obs = sub["observed_mean"].to_numpy(dtype=float)
+            sd_obs = sub["observed_std"].fillna(0).to_numpy(dtype=float)
+
+            label_prefix = "" if group_name == "all" else f"{group_name}: "
+
+            ax.plot(
+                x,
+                y_est,
+                marker="o",
+                label=f"{label_prefix}{estimator}",
+            )
+            ax.fill_between(
+                x,
+                y_est - sd_est,
+                y_est + sd_est,
+                alpha=0.2,
+            )
+
+            ax.plot(
+                x,
+                y_obs,
+                marker="s",
+                linestyle="--",
+                label=f"{label_prefix}observed species",
+            )
+            ax.fill_between(
+                x,
+                y_obs - sd_obs,
+                y_obs + sd_obs,
+                alpha=0.12,
+            )
 
         ax.set_xlabel("Number of samples")
-        ax.set_ylabel(estimator)
+        ax.set_ylabel("Number of clusters / species")
         ax.set_title(title or "Chao2 saturation curve")
         ax.legend(frameon=False)
         fig.tight_layout()
 
-    return Chao2SaturationResult(curve=curve, incidence=incidence_all, summary=summary, fig=fig, ax=ax)
+    return Chao2SaturationResult(
+        curve=curve,
+        incidence=incidence_all,
+        summary=summary,
+        fig=fig,
+        ax=ax,
+    )
